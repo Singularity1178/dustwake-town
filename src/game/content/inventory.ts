@@ -1,0 +1,25 @@
+// Pack capacity tiers (data). Capacity is never stored: it is derived from
+// world/actor state each time it's needed. The highest satisfied tier wins, so
+// adding a tier (say, a cart) is one more row.
+//
+// Why not "owns item X": if capacity came from an item sitting in the pack,
+// that item would take one of the slots it grants and could be dropped, which
+// would shrink capacity under the player's feet. So tiers read what the golem
+// is or wears. The iron arm is installed on pickup (the `golem.arm` flag; it
+// never takes a slot). The basket is gear: it rides in the pack like any item
+// until it is worn in the actor's back slot (`worn`, Actor.gear; sim/gear.ts),
+// and taking it off is refused unless everything still fits afterwards.
+import type { Requirement } from "./interactions";
+import { FLAGS } from "./flags";
+import type { ItemId } from "./items";
+
+/** Shared by actor packs and prop inventories. */
+export type Slot = { item: ItemId; n: number } | null;
+
+export interface CapacityTier { requires?: Requirement; slots: number }
+
+export const CAPACITY_TIERS: CapacityTier[] = [
+  { slots: 8 },
+  { requires: { actorFlags: [FLAGS.golemArm] }, slots: 16 },
+  { requires: { worn: ["basket"] }, slots: 48 },
+];
